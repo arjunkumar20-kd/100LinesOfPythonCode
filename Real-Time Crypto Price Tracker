@@ -1,0 +1,53 @@
+#!/usr/bin/env python3
+"""
+crypto_live.py
+Real-time cryptocurrency price tracker using CoinGecko API.
+
+Usage:
+  python crypto_live.py bitcoin ethereum dogecoin
+"""
+
+import requests
+import time
+import os
+import sys
+
+API_URL = "https://api.coingecko.com/api/v3/simple/price"
+
+def clear_console():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+def get_prices(coins):
+    """Fetch current prices for given coins from CoinGecko."""
+    ids = ",".join(coins)
+    params = {"ids": ids, "vs_currencies": "usd"}
+    r = requests.get(API_URL, params=params)
+    r.raise_for_status()
+    return r.json()
+
+def display_prices(prices):
+    print("💰 Real-Time Crypto Prices (USD)")
+    print("-" * 40)
+    for coin, data in prices.items():
+        print(f"{coin.capitalize():<12}: ${data['usd']}")
+    print("-" * 40)
+    print("Press Ctrl+C to stop\n")
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: python crypto_live.py <coin1> <coin2> ...")
+        print("Example: python crypto_live.py bitcoin ethereum dogecoin")
+        sys.exit(1)
+
+    coins = [c.lower() for c in sys.argv[1:]]
+    try:
+        while True:
+            clear_console()
+            prices = get_prices(coins)
+            display_prices(prices)
+            time.sleep(5)  # update every 5 seconds
+    except KeyboardInterrupt:
+        print("\nExiting... Have a great day! 🚀")
+
+if __name__ == "__main__":
+    main()
